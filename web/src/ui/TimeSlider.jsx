@@ -40,27 +40,44 @@ export default function TimeSlider() {
   };
   
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <input
-        type="range"
-        min={minTimeValue}
-        max={maxTimeValue}
-        value={fromTime}
-        onChange={handleFromChange}
-        style={{ width: '200px' }}
-      />
-      <span style={{ fontSize: '12px', minWidth: '150px' }}>
-        {from.toLocaleString('ko-KR')} ~ {to.toLocaleString('ko-KR')}
-      </span>
-      <input
-        type="range"
-        min={minTimeValue}
-        max={maxTimeValue}
-        value={toTime}
-        onChange={handleToChange}
-        style={{ width: '200px' }}
-      />
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '8px 16px',
+      background: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: '12px',
+      border: '1px solid rgba(148, 163, 184, 0.1)',
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '200px' }}>
+        <input
+          type="range"
+          min={minTimeValue}
+          max={maxTimeValue}
+          value={fromTime}
+          onChange={handleFromChange}
+          style={{ width: '100%' }}
+        />
+        <input
+          type="range"
+          min={minTimeValue}
+          max={maxTimeValue}
+          value={toTime}
+          onChange={handleToChange}
+          style={{ width: '100%' }}
+        />
+      </div>
+      <div style={{
+        fontSize: '12px',
+        color: '#cbd5e1',
+        minWidth: '200px',
+        textAlign: 'center',
+        padding: '4px 8px',
+        background: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: '6px',
+      }}>
+        {from.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} ~ {to.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+      </div>
     </div>
   );
 }
-
