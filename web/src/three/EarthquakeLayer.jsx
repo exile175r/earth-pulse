@@ -11,6 +11,11 @@ export default function EarthquakeLayer() {
   const [eqData, setEqData] = useState([]);
   
   useEffect(() => {
+    // timeRange가 없으면 기본값 사용
+    if (!timeRange || !timeRange.from || !timeRange.to) {
+      return;
+    }
+
     async function fetchData() {
       try {
         const data = await get(endpoints.eq.recent({

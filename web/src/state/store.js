@@ -69,8 +69,20 @@ export const useStore = create(
           perfMode: state.view.perfMode,
           param: state.view.param,
           mapMode: state.view.mapMode,
+          timeRange: state.view.timeRange,
         },
       }),
+      merge: (persistedState, currentState) => {
+        // localStorage에서 복원할 때 timeRange가 없으면 기본값 설정
+        const merged = { ...currentState, ...persistedState };
+        if (merged.view && !merged.view.timeRange) {
+          merged.view.timeRange = {
+            from: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            to: new Date().toISOString(),
+          };
+        }
+        return merged;
+      },
     }
   )
 );

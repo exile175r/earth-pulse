@@ -4,8 +4,15 @@ export default function TimeSlider() {
   const timeRange = useStore((state) => state.view.timeRange);
   const setView = useStore((state) => state.setView);
   
-  const from = new Date(timeRange.from);
-  const to = new Date(timeRange.to);
+  // timeRange가 없으면 기본값 사용
+  const defaultTimeRange = {
+    from: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    to: new Date().toISOString(),
+  };
+  const safeTimeRange = timeRange || defaultTimeRange;
+  
+  const from = new Date(safeTimeRange.from);
+  const to = new Date(safeTimeRange.to);
   const now = new Date();
   const minTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7일 전
   const maxTime = now;
@@ -21,7 +28,7 @@ export default function TimeSlider() {
       setView({
         timeRange: {
           from: newFrom.toISOString(),
-          to: timeRange.to,
+          to: safeTimeRange.to,
         },
       });
     }
@@ -32,7 +39,7 @@ export default function TimeSlider() {
     if (newTo > from) {
       setView({
         timeRange: {
-          from: timeRange.from,
+          from: safeTimeRange.from,
           to: newTo.toISOString(),
         },
       });

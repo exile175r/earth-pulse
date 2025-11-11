@@ -12,6 +12,11 @@ export default function SummaryCards() {
   });
 
   useEffect(() => {
+    // timeRange가 없으면 기본값 사용
+    if (!timeRange || !timeRange.from || !timeRange.to) {
+      return;
+    }
+
     async function fetchStats() {
       try {
         const [eqData, aqData] = await Promise.all([

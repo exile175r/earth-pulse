@@ -10,6 +10,11 @@ export default function AirQualityHeatmap() {
   const [aqData, setAqData] = useState([]);
   
   useEffect(() => {
+    // timeRange가 없으면 기본값 사용
+    if (!timeRange || !timeRange.from || !timeRange.to) {
+      return;
+    }
+
     async function fetchData() {
       try {
         const data = await get(endpoints.aq.recent({
