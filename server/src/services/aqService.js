@@ -59,8 +59,22 @@ export const aqService = {
         throw new Error(`OpenAQ API error: ${response.status} ${response.statusText}`);
       }
       
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse OpenAQ response as JSON:', jsonError);
+        const text = await response.text();
+        console.error('Response text:', text.substring(0, 500));
+        throw new Error(`OpenAQ API returned invalid JSON: ${response.status} ${response.statusText}`);
+      }
+      
       let results = data.results || [];
+      
+      if (!Array.isArray(results)) {
+        console.error('OpenAQ API returned unexpected data structure:', data);
+        results = [];
+      }
       
       // BBox 필터링 (서버 측에서)
       if (bbox) {

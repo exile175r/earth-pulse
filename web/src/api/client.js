@@ -38,7 +38,20 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
         continue;
       }
       
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // 에러 응답 본문 읽기
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.clone().json();
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (e) {
+        // JSON 파싱 실패 시 기본 메시지 사용
+      }
+      
+      throw new Error(errorMessage);
     } catch (error) {
       lastError = error;
       if (i < maxRetries - 1) {

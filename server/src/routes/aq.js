@@ -14,8 +14,15 @@ router.get('/recent', async (req, res) => {
   try {
     const { from, to, bbox, param = 'pm25', bucket = '1h' } = req.query;
     
+    console.log('AQ API request:', { from, to, bbox, param, bucket });
+    
     const timeRange = parseTimeRange(from, to, 24);
     const bboxObj = parseBBox(bbox);
+    
+    console.log('Parsed timeRange:', {
+      from: timeRange.from.toISOString(),
+      to: timeRange.to.toISOString(),
+    });
     
     const result = await aqService.getRecent({
       from: timeRange.from,
@@ -28,11 +35,21 @@ router.get('/recent', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error in /api/aq/recent:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
     console.error('Stack:', error.stack);
+    console.error('Request params:', req.query);
+    
     const statusCode = error.message.includes('timeout') ? 504 : 500;
     res.status(statusCode).json({ 
       error: error.message || 'Internal server error',
       endpoint: '/api/aq/recent',
+      requestParams: {
+        param: req.query.param,
+        from: req.query.from,
+        to: req.query.to,
+        bucket: req.query.bucket,
+      },
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
