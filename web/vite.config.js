@@ -14,5 +14,7 @@ export default defineConfig({
       },
     },
   },
+  // WorldWind 이미지 파일을 정적 자산으로 제공
+  assetsInclude: ['**/*.jpg', '**/*.png', '**/*.json'],
 });
 

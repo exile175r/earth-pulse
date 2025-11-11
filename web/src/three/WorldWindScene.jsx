@@ -3,31 +3,12 @@ import { useStore } from '../state/store.js';
 import WorldWindEarthquakeLayer from './WorldWindEarthquakeLayer.jsx';
 import WorldWindAirQualityLayer from './WorldWindAirQualityLayer.jsx';
 
-// WorldWind를 동적으로 로드
-let WorldWind = null;
-const loadWorldWind = async () => {
-  if (WorldWind) return WorldWind;
-  
-  try {
-    // WorldWind를 전역 변수로 로드
-    if (typeof window !== 'undefined' && window.WorldWind) {
-      WorldWind = window.WorldWind;
-      return WorldWind;
-    }
-    
-    // 모듈로 로드 시도
-    const module = await import('@nasaworldwind/worldwind/build/dist/worldwind.js');
-    WorldWind = module.default || module.WorldWind || window.WorldWind;
-    
-    if (!WorldWind && typeof window !== 'undefined') {
-      WorldWind = window.WorldWind;
-    }
-    
-    return WorldWind;
-  } catch (error) {
-    console.error('Failed to load WorldWind:', error);
-    return null;
+// WorldWind는 index.html에서 전역 스크립트로 로드됨
+const getWorldWind = () => {
+  if (typeof window !== 'undefined' && window.WorldWind) {
+    return window.WorldWind;
   }
+  return null;
 };
 
 export default function WorldWindScene() {
@@ -42,18 +23,19 @@ export default function WorldWindScene() {
     if (!canvasRef.current) return;
 
     // WorldWind가 로드될 때까지 대기
-    const initWorldWind = async () => {
-      const loadedWorldWind = await loadWorldWind();
+    const initWorldWind = () => {
+      const WorldWind = getWorldWind();
       
-      if (!loadedWorldWind) {
+      if (!WorldWind) {
         // WorldWind가 아직 로드되지 않았으면 재시도
         setTimeout(initWorldWind, 100);
         return;
       }
-      
-      WorldWind = loadedWorldWind;
 
       if (wwdRef.current) return; // 이미 초기화됨
+
+      // WorldWind 이미지 경로 설정
+      WorldWind.configuration.baseUrl = '/worldwind/';
 
       // WorldWindow 생성
       const wwd = new WorldWind.WorldWindow(canvasRef.current);
@@ -131,6 +113,7 @@ export default function WorldWindScene() {
 
   // 모드 변경 시 뷰 업데이트
   useEffect(() => {
+    const WorldWind = getWorldWind();
     if (!wwdRef.current || !WorldWind) return;
 
     if (mapMode === '2d') {
