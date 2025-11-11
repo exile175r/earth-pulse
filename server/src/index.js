@@ -25,20 +25,23 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 
-// 라우트
+// 라우트 - /api로 시작하는 경로만 처리
 app.use('/api/health', healthRouter);
 app.use('/api/eq', eqRouter);
 app.use('/api/aq', aqRouter);
 app.use('/api/tiles', tilesRouter);
 app.use('/api/admin', adminRouter);
 
-// 404 핸들러
-app.use((req, res) => {
+// /api로 시작하지 않는 경로는 무시 (프론트엔드로 라우팅)
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api')) {
+    return next(); // Express가 처리하지 않고 Vercel 라우팅으로 넘김
+  }
+  // /api로 시작하는 경로지만 매칭되지 않은 경우
   res.status(404).json({
     error: 'Not Found',
-    message: `Route ${req.path} not found`,
+    message: `API route ${req.path} not found`,
     availableEndpoints: [
-      'GET /',
       'GET /api/health',
       'GET /api/eq/recent',
       'GET /api/aq/recent',
