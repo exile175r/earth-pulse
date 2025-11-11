@@ -25,12 +25,42 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 
+// 루트 경로
+app.get('/', (req, res) => {
+  res.json({
+    message: 'EarthPulse API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      earthquakes: '/api/eq/recent',
+      airQuality: '/api/aq/recent',
+      tiles: '/api/tiles/aq-heat/:z/:x/:y',
+    },
+  });
+});
+
 // 라우트
 app.use('/api/health', healthRouter);
 app.use('/api/eq', eqRouter);
 app.use('/api/aq', aqRouter);
 app.use('/api/tiles', tilesRouter);
 app.use('/api/admin', adminRouter);
+
+// 404 핸들러
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Route ${req.path} not found`,
+    availableEndpoints: [
+      'GET /',
+      'GET /api/health',
+      'GET /api/eq/recent',
+      'GET /api/aq/recent',
+      'GET /api/aq/top',
+      'GET /api/tiles/aq-heat/:z/:x/:y',
+    ],
+  });
+});
 
 // 에러 핸들링
 app.use((err, req, res, next) => {
