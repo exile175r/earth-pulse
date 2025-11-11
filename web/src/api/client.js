@@ -16,10 +16,16 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
   
   for (let i = 0; i < maxRetries; i++) {
     try {
+      // AbortController를 사용하여 타임아웃 구현
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
       const response = await fetch(url, {
         ...options,
-        signal: AbortSignal.timeout(30000), // 30초 타임아웃
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.ok) {
         return response;
