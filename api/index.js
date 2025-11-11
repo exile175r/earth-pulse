@@ -1,7 +1,5 @@
-// Vercel 서버리스 함수로 Express 앱 래핑
+// Vercel 서버리스 함수로 Express 앱 export
+// @vercel/node는 Express 앱을 직접 지원합니다
 import app from '../server/src/index.js';
 
-// Vercel 서버리스 함수는 handler 함수를 export해야 함
-export default function handler(req, res) {
-  return app(req, res);
-}
+export default app;
