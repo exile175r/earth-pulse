@@ -26,6 +26,39 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// 크론 작업 엔드포인트 (Vercel Cron Jobs용)
+app.get('/api/cron/usgs', async (req, res) => {
+  try {
+    // Vercel Cron Jobs 인증 확인 (x-vercel-cron 헤더 확인)
+    if (process.env.VERCEL && !req.headers['x-vercel-cron']) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { fetchUSGS } = await import('./jobs/fetchUSGS.js');
+    const result = await fetchUSGS('all_hour');
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error('Error in /api/cron/usgs:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/cron/openaq', async (req, res) => {
+  try {
+    // Vercel Cron Jobs 인증 확인 (x-vercel-cron 헤더 확인)
+    if (process.env.VERCEL && !req.headers['x-vercel-cron']) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const { fetchOpenAQ } = await import('./jobs/fetchOpenAQ.js');
+    const result = await fetchOpenAQ();
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error('Error in /api/cron/openaq:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 라우트
 app.use('/api/health', healthRouter);
 app.use('/api/eq', eqRouter);
@@ -39,7 +72,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-// 서버 시작
+// 서버 시작 (로컬 개발 또는 전통적인 서버 환경에서만)
 async function start() {
   try {
     // 데이터베이스 연결 확인
@@ -51,8 +84,10 @@ async function start() {
     
     console.log('✓ Database connected');
     
-    // 크론 작업 시작
-    setupCronJobs();
+    // 크론 작업 시작 (Vercel에서는 Cron Jobs 사용)
+    if (process.env.VERCEL !== '1') {
+      setupCronJobs();
+    }
     
     // 서버 시작
     app.listen(config.server.port, () => {
@@ -65,5 +100,11 @@ async function start() {
   }
 }
 
-start();
+// Vercel 환경이 아닐 때만 서버 시작
+if (process.env.VERCEL !== '1') {
+  start();
+}
+
+// Vercel 서버리스 함수로 export
+export default app;
 
