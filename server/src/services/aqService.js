@@ -9,11 +9,24 @@ export const aqService = {
    * 최근 대기질 데이터 조회
    */
   async getRecent({ from, to, bbox, parameter, bucket }) {
+    // from과 to를 Date 객체로 변환
+    const fromDate = from instanceof Date ? from : new Date(from);
+    const toDate = to instanceof Date ? to : new Date(to);
+    
+    // 유효성 검사
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      throw new Error('Invalid date range: from and to must be valid dates');
+    }
+    
+    if (!parameter) {
+      throw new Error('Parameter is required (e.g., pm25, pm10, o3)');
+    }
+    
     const url = 'https://api.openaq.org/v2/measurements';
     
     const params = new URLSearchParams({
-      date_from: from.toISOString(),
-      date_to: to.toISOString(),
+      date_from: fromDate.toISOString(),
+      date_to: toDate.toISOString(),
       parameter,
       limit: '10000',
       page: '1',
@@ -80,7 +93,7 @@ export const aqService = {
       
       // 버킷별 집계
       if (bucket && bucket !== 'none') {
-        const buckets = getTimeBuckets(from, to, bucket);
+        const buckets = getTimeBuckets(fromDate, toDate, bucket);
         const bucketed = {};
         
         buckets.forEach(b => {
@@ -132,8 +145,19 @@ export const aqService = {
       };
     } catch (error) {
       console.error('Error fetching OpenAQ data:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        from: fromDate.toISOString(),
+        to: toDate.toISOString(),
+        parameter,
+      });
       if (error.name === 'AbortError') {
         throw new Error('Request timeout: OpenAQ API did not respond within 30 seconds');
+      }
+      if (error.message.includes('Invalid date')) {
+        throw error;
       }
       throw new Error(`Failed to fetch OpenAQ data: ${error.message}`);
     }

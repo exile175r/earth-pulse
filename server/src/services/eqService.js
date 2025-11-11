@@ -9,9 +9,18 @@ export const eqService = {
    * 최근 지진 데이터 조회
    */
   async getRecent({ from, to, bbox, minMagnitude, bucket }) {
+    // from과 to를 Date 객체로 변환
+    const fromDate = from instanceof Date ? from : new Date(from);
+    const toDate = to instanceof Date ? to : new Date(to);
+    
+    // 유효성 검사
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      throw new Error('Invalid date range: from and to must be valid dates');
+    }
+    
     // USGS API는 최근 데이터만 제공 (all_hour, all_day, all_week, all_month)
     // 시간 범위에 따라 적절한 interval 선택
-    const hoursDiff = (to - from) / (1000 * 60 * 60);
+    const hoursDiff = (toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60);
     let interval = 'all_hour';
     if (hoursDiff > 24) interval = 'all_day';
     if (hoursDiff > 168) interval = 'all_week';
@@ -43,7 +52,7 @@ export const eqService = {
       // 시간 필터링
       features = features.filter(feature => {
         const time = new Date(feature.properties.time);
-        return time >= from && time <= to;
+        return time >= fromDate && time <= toDate;
       });
       
       // 최소 규모 필터링
@@ -85,7 +94,7 @@ export const eqService = {
       
       // 버킷별 집계가 필요한 경우
       if (bucket && bucket !== 'none') {
-        const buckets = getTimeBuckets(from, to, bucket);
+        const buckets = getTimeBuckets(fromDate, toDate, bucket);
         const bucketed = {};
         
         buckets.forEach(b => {

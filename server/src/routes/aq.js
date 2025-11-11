@@ -28,10 +28,12 @@ router.get('/recent', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error in /api/aq/recent:', error);
+    console.error('Stack:', error.stack);
     const statusCode = error.message.includes('timeout') ? 504 : 500;
     res.status(statusCode).json({ 
       error: error.message || 'Internal server error',
-      endpoint: '/api/aq/recent'
+      endpoint: '/api/aq/recent',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 });
