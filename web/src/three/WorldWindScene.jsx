@@ -41,27 +41,27 @@ export default function WorldWindScene() {
       const wwd = new WorldWind.WorldWindow(canvasRef.current);
       wwdRef.current = wwd;
 
-      // 기본 레이어 추가 (Blue Marble)
-      const blueMarbleLayer = new WorldWind.BlueMarbleLayer();
-      wwd.addLayer(blueMarbleLayer);
+      // 기본 레이어 추가 (Blue Marble Next Generation)
+      const bmngLayer = new WorldWind.BMNGLayer();
+      wwd.addLayer(bmngLayer);
 
-      // 좌표 표시 레이어
-      const coordinatesLayer = new WorldWind.CoordinatesDisplayLayer(wwd);
-      wwd.addLayer(coordinatesLayer);
+      // 좌표 표시 레이어 (선택사항)
+      // const coordinatesLayer = new WorldWind.CoordinatesDisplayLayer(wwd);
+      // wwd.addLayer(coordinatesLayer);
 
-      // 나침반 레이어
-      const compassLayer = new WorldWind.CompassLayer();
-      wwd.addLayer(compassLayer);
+      // 나침반 레이어 (선택사항)
+      // const compassLayer = new WorldWind.CompassLayer();
+      // wwd.addLayer(compassLayer);
 
-      // 지진 데이터 레이어
+      // 지진 데이터 레이어 (Placemark를 직접 추가하는 방식으로 변경)
       const earthquakeLayer = new WorldWindEarthquakeLayer(wwd);
       earthquakeLayer.setWorldWind(WorldWind);
-      wwd.addLayer(earthquakeLayer);
+      wwd.earthquakeLayer = earthquakeLayer; // 참조 저장
 
-      // 대기질 데이터 레이어
+      // 대기질 데이터 레이어 (Placemark를 직접 추가하는 방식으로 변경)
       const airQualityLayer = new WorldWindAirQualityLayer(wwd);
       airQualityLayer.setWorldWind(WorldWind);
-      wwd.addLayer(airQualityLayer);
+      wwd.airQualityLayer = airQualityLayer; // 참조 저장
 
       // 클릭 이벤트 처리
       const clickHandler = (event) => {
