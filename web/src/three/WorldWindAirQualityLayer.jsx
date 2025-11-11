@@ -149,6 +149,12 @@ export default class WorldWindAirQualityLayer {
         timeRange: this.timeRange,
         parameter: this.parameter,
       });
+      
+      // OpenAQ API v2가 더 이상 사용 불가능한 경우 사용자에게 알림
+      if (error.message && error.message.includes('410') || error.message.includes('deprecated')) {
+        console.warn('OpenAQ API v2 is deprecated. Consider using an alternative data source.');
+      }
+      
       // 에러가 발생해도 앱이 계속 작동하도록 빈 배열로 설정
       this.placemarks = [];
     }

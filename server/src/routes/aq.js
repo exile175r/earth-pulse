@@ -40,6 +40,17 @@ router.get('/recent', async (req, res) => {
     console.error('Stack:', error.stack);
     console.error('Request params:', req.query);
     
+    // 410 Gone (API deprecated)인 경우 빈 데이터 반환
+    if (error.message && (error.message.includes('410') || error.message.includes('deprecated'))) {
+      console.warn('OpenAQ API v2 is deprecated. Returning empty data.');
+      return res.json({
+        buckets: [],
+        measurements: [],
+        total: 0,
+        warning: 'OpenAQ API v2 is no longer available. Air quality data is temporarily unavailable.',
+      });
+    }
+    
     const statusCode = error.message.includes('timeout') ? 504 : 500;
     res.status(statusCode).json({ 
       error: error.message || 'Internal server error',

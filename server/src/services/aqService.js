@@ -22,6 +22,8 @@ export const aqService = {
       throw new Error('Parameter is required (e.g., pm25, pm10, o3)');
     }
     
+    // OpenAQ API v2는 410 Gone을 반환하므로, v3 또는 대안 사용 고려 필요
+    // 일단 v2를 시도하고, 410 오류 시 명확한 메시지 반환
     const url = 'https://api.openaq.org/v2/measurements';
     
     const params = new URLSearchParams({
@@ -53,6 +55,9 @@ export const aqService = {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
+        if (response.status === 410) {
+          throw new Error('OpenAQ API v2 is no longer available. The API endpoint has been deprecated.');
+        }
         if (response.status === 429) {
           throw new Error('OpenAQ rate limit exceeded. Please wait before retrying.');
         }
