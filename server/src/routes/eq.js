@@ -29,7 +29,11 @@ router.get('/recent', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error in /api/eq/recent:', error);
-    res.status(500).json({ error: error.message });
+    const statusCode = error.message.includes('timeout') ? 504 : 500;
+    res.status(statusCode).json({ 
+      error: error.message || 'Internal server error',
+      endpoint: '/api/eq/recent'
+    });
   }
 });
 

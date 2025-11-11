@@ -20,12 +20,18 @@ export const eqService = {
     const url = `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${interval}.geojson`;
     
     try {
+      // AbortController를 사용하여 타임아웃 구현 (Vercel 호환성)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
       const response = await fetch(url, {
         headers: {
           'User-Agent': config.api.userAgent,
         },
-        signal: AbortSignal.timeout(30000),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`USGS API error: ${response.status} ${response.statusText}`);
@@ -121,7 +127,10 @@ export const eqService = {
       };
     } catch (error) {
       console.error('Error fetching USGS data:', error);
-      throw error;
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout: USGS API did not respond within 30 seconds');
+      }
+      throw new Error(`Failed to fetch USGS data: ${error.message}`);
     }
   },
 };

@@ -26,12 +26,18 @@ export const aqService = {
     }
     
     try {
+      // AbortController를 사용하여 타임아웃 구현 (Vercel 호환성)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      
       const response = await fetch(`${url}?${params}`, {
         headers: {
           'User-Agent': config.api.userAgent,
         },
-        signal: AbortSignal.timeout(30000),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         if (response.status === 429) {
@@ -126,7 +132,10 @@ export const aqService = {
       };
     } catch (error) {
       console.error('Error fetching OpenAQ data:', error);
-      throw error;
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout: OpenAQ API did not respond within 30 seconds');
+      }
+      throw new Error(`Failed to fetch OpenAQ data: ${error.message}`);
     }
   },
   

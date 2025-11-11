@@ -65,7 +65,13 @@ app.use((req, res) => {
 // 에러 핸들링
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ error: err.message || 'Internal server error' });
+  console.error('Stack:', err.stack);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({ 
+    error: err.message || 'Internal server error',
+    path: req.path,
+    method: req.method
+  });
 });
 
 // 서버 시작 (로컬 개발 또는 전통적인 서버 환경에서만)
