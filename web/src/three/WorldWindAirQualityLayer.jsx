@@ -47,8 +47,12 @@ export default class WorldWindAirQualityLayer {
       
       // 기존 placemark 제거
       this.placemarks.forEach(pm => {
-        if (this.wwd && this.wwd.removePlacemark) {
-          this.wwd.removePlacemark(pm);
+        if (this.wwd) {
+          if (this.wwd.removeRenderable) {
+            this.wwd.removeRenderable(pm);
+          } else if (this.wwd.removePlacemark) {
+            this.wwd.removePlacemark(pm);
+          }
         }
       });
       this.placemarks = [];
@@ -121,7 +125,12 @@ export default class WorldWindAirQualityLayer {
           time: bucket.start,
         };
         
-        this.wwd.addPlacemark(placemark);
+        // WorldWind는 addRenderable을 사용하여 Placemark 추가
+        if (this.wwd.addRenderable) {
+          this.wwd.addRenderable(placemark);
+        } else if (this.wwd.addPlacemark) {
+          this.wwd.addPlacemark(placemark);
+        }
         this.placemarks.push(placemark);
       }
       

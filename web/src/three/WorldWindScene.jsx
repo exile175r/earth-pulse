@@ -71,16 +71,29 @@ export default function WorldWindScene() {
         
         if (pickList.objects.length > 0) {
           const pickedObject = pickList.objects[0];
-          if (pickedObject.userObject && pickedObject.userObject.position) {
-            const position = pickedObject.userObject.position;
-            const lat = position.latitude;
-            const lng = position.longitude;
+          // WorldWind의 Placemark는 userObject에 직접 저장됨
+          if (pickedObject.userObject) {
+            const userObject = pickedObject.userObject;
+            // Placemark의 position 속성 확인
+            let position = null;
+            if (userObject.position) {
+              position = userObject.position;
+            } else if (pickedObject.position) {
+              position = pickedObject.position;
+            } else if (pickedObject.placemark && pickedObject.placemark.position) {
+              position = pickedObject.placemark.position;
+            }
             
-            // 3D/2D 모드 전환
-            if (mapMode === '3d') {
-              setView({ mapMode: '2d' });
-            } else {
-              setView({ mapMode: '3d' });
+            if (position) {
+              const lat = position.latitude;
+              const lng = position.longitude;
+              
+              // 3D/2D 모드 전환
+              if (mapMode === '3d') {
+                setView({ mapMode: '2d' });
+              } else {
+                setView({ mapMode: '3d' });
+              }
             }
           }
         }
