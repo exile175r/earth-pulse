@@ -109,26 +109,48 @@ export const aqService = {
         });
         
         measurements.forEach(measurement => {
-          const measuredAt = new Date(measurement.measured_at);
-          const bucketKey = buckets.find(b => 
-            measuredAt >= b.start && measuredAt < b.end
-          );
-          
-          if (bucketKey) {
-            const key = bucketKey.start.toISOString();
-            const value = measurement.value;
-            bucketed[key].count++;
-            bucketed[key].max = Math.max(bucketed[key].max, value);
-            bucketed[key].min = Math.min(bucketed[key].min, value);
-            bucketed[key].measurements.push(measurement);
+          try {
+            const measuredAt = new Date(measurement.measured_at);
+            if (isNaN(measuredAt.getTime())) {
+              console.warn('Invalid measurement date:', measurement.measured_at);
+              return;
+            }
+            
+            const bucketKey = buckets.find(b => 
+              measuredAt >= b.start && measuredAt < b.end
+            );
+            
+            if (bucketKey) {
+              const key = bucketKey.start.toISOString();
+              const value = typeof measurement.value === 'number' 
+                ? measurement.value 
+                : parseFloat(measurement.value) || 0;
+              
+              if (!isNaN(value)) {
+                bucketed[key].count++;
+                bucketed[key].max = Math.max(bucketed[key].max, value);
+                bucketed[key].min = Math.min(bucketed[key].min, value);
+                bucketed[key].measurements.push(measurement);
+              }
+            }
+          } catch (err) {
+            console.warn('Error processing measurement:', err, measurement);
           }
         });
         
         // 평균 계산
         Object.values(bucketed).forEach(bucket => {
           if (bucket.count > 0) {
-            const sum = bucket.measurements.reduce((acc, m) => acc + m.value, 0);
-            bucket.avg = sum / bucket.count;
+            try {
+              const sum = bucket.measurements.reduce((acc, m) => {
+                const value = typeof m.value === 'number' ? m.value : parseFloat(m.value) || 0;
+                return acc + value;
+              }, 0);
+              bucket.avg = sum / bucket.count;
+            } catch (err) {
+              console.error('Error calculating bucket average:', err);
+              bucket.avg = 0;
+            }
           }
           if (bucket.min === Infinity) bucket.min = 0;
         });

@@ -73,10 +73,16 @@ export default class WorldWindAirQualityLayer {
         let count = 0;
         
         bucket.measurements.forEach(m => {
-          if (m.lat && m.lng) {
-            totalLat += m.lat;
-            totalLng += m.lng;
-            count++;
+          try {
+            const lat = typeof m.lat === 'number' ? m.lat : parseFloat(m.lat);
+            const lng = typeof m.lng === 'number' ? m.lng : parseFloat(m.lng);
+            if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng)) {
+              totalLat += lat;
+              totalLng += lng;
+              count++;
+            }
+          } catch (err) {
+            console.warn('Error processing measurement location:', err, m);
           }
         });
         
@@ -137,6 +143,14 @@ export default class WorldWindAirQualityLayer {
       this.wwd.redraw();
     } catch (error) {
       console.error('Error loading air quality data:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        timeRange: this.timeRange,
+        parameter: this.parameter,
+      });
+      // 에러가 발생해도 앱이 계속 작동하도록 빈 배열로 설정
+      this.placemarks = [];
     }
   }
 }
