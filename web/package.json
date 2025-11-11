@@ -16,8 +16,7 @@
     "@react-three/fiber": "^8.15.11",
     "@react-three/drei": "^9.88.13",
     "three": "^0.158.0",
-    "zustand": "^4.4.7",
-    "babel-plugin-react-compiler": "^19.0.0"
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
