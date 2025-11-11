@@ -20,9 +20,11 @@ git remote add origin https://github.com/exile175r/earthpulse.git
 git push -u origin main
 ```
 
-## 2단계: Vercel에 백엔드 배포 (3분) ⚠️ 먼저 배포!
+## 2단계: Vercel에 백엔드 배포 (1분) ⚠️ 먼저 배포!
 
 > 💡 **팁**: 백엔드를 먼저 배포하면 URL을 바로 받을 수 있어서 프론트엔드 환경 변수 설정이 쉬워집니다.
+> 
+> 🎉 **좋은 소식**: 데이터베이스가 필요 없습니다! API 프록시 모드로 작동하므로 USGS와 OpenAQ API에서 직접 데이터를 가져옵니다.
 
 1. [vercel.com](https://vercel.com) 가입/로그인
 2. "Add New Project" 클릭
@@ -32,21 +34,13 @@ git push -u origin main
    - Framework Preset: Other (또는 자동 감지)
    - Build Command: (비워두기 - 서버리스 함수이므로 빌드 불필요)
    - Output Directory: (비워두기)
-5. Environment Variables 추가:
+5. Environment Variables 추가 (선택사항):
    ```
-   DB_HOST=your_db_host
-   DB_PORT=3306
-   DB_USER=your_db_user
-   DB_PASSWORD=your_db_password
-   DB_NAME=earth_dashboard
    NODE_ENV=production
-   ADMIN_TOKEN=your_secure_token
+   ADMIN_TOKEN=your_secure_token (admin 엔드포인트 사용 시)
    API_USER_AGENT=EarthPulse/1.0
    ```
-   > 💡 **데이터베이스**: Vercel은 데이터베이스를 제공하지 않으므로, 별도의 MySQL 호스팅이 필요합니다.
-   > - [PlanetScale](https://planetscale.com) (무료 티어 제공)
-   > - [Railway](https://railway.app) MySQL (무료 티어 제공)
-   > - [Supabase](https://supabase.com) PostgreSQL (무료 티어 제공, 코드 수정 필요)
+   > 💡 **참고**: 데이터베이스 환경 변수는 필요 없습니다! API 프록시 모드로 작동합니다.
 6. Deploy!
 7. **배포 완료 후 Vercel에서 제공하는 URL 복사** (예: `https://your-project.vercel.app`)
 
@@ -74,28 +68,7 @@ git push -u origin main
    > 💡 백엔드 배포 시 받은 Vercel URL을 여기에 입력하세요!
 5. Deploy!
 
-## 4단계: 데이터베이스 마이그레이션
-
-데이터베이스 호스팅 서비스에 직접 접속하여 마이그레이션을 실행하세요:
-
-**PlanetScale의 경우:**
-1. PlanetScale 대시보드에서 데이터베이스 선택
-2. "Console" 탭 클릭
-3. `server/src/db/schema.sql` 파일의 내용을 복사하여 실행
-
-**Railway MySQL의 경우:**
-1. Railway 대시보드에서 MySQL 서비스 선택
-2. "Data" 탭 → "Connect" 클릭
-3. MySQL 클라이언트로 접속하여 `server/src/db/schema.sql` 실행
-
-**또는 로컬에서 실행:**
-```bash
-cd server
-# .env 파일에 프로덕션 데이터베이스 정보 설정
-npm run migrate
-```
-
-## 5단계: CORS 설정 확인
+## 4단계: CORS 설정 확인
 
 `server/src/index.js`에서 CORS가 이미 모든 origin을 허용하도록 설정되어 있습니다:
 ```javascript
@@ -115,7 +88,7 @@ app.use(cors({
 
 GitHub에 푸시하면 Vercel이 자동으로 재배포됩니다.
 
-## 6단계: 프론트엔드 API URL 업데이트 (필요시)
+## 5단계: 프론트엔드 API URL 업데이트 (필요시)
 
 > 💡 백엔드를 먼저 배포했다면 이미 환경 변수에 설정했을 것입니다.
 > 만약 나중에 백엔드 URL이 변경되었다면:
@@ -145,9 +118,9 @@ Vercel 대시보드에서:
    ```
    브라우저에서 열어서 3D 지구가 표시되는지 확인
 
-3. **크론 작업 확인:**
-   - Vercel 대시보드 → 프로젝트 → Settings → Cron Jobs
-   - USGS (5분마다)와 OpenAQ (15분마다) 작업이 자동으로 실행됩니다
+3. **API 프록시 확인:**
+   - 데이터는 USGS와 OpenAQ API에서 실시간으로 가져옵니다
+   - 데이터베이스나 크론 작업이 필요 없습니다
 
 ## 📝 포트폴리오에 추가
 
@@ -170,19 +143,14 @@ Vercel 대시보드에서:
 - `api/index.js` 파일이 존재하는지 확인
 
 ### 백엔드 배포 실패
-- 환경 변수가 모두 설정되었는지 확인
-- 데이터베이스 연결 정보가 올바른지 확인
 - Vercel 로그에서 정확한 에러 메시지 확인
+- `api/index.js` 파일이 존재하는지 확인
+- `vercel.json` 설정이 올바른지 확인
 
-### 데이터베이스 연결 오류
-- 데이터베이스 호스팅 서비스가 실행 중인지 확인
-- 방화벽 설정에서 Vercel IP를 허용했는지 확인 (필요시)
-- 환경 변수의 데이터베이스 정보가 정확한지 확인
-
-### 크론 작업이 실행되지 않음
-- Vercel 대시보드 → Settings → Cron Jobs에서 설정 확인
-- `vercel.json`의 `crons` 설정이 올바른지 확인
-- Vercel Pro 플랜이 필요한지 확인 (무료 플랜에서는 제한적)
+### API 호출 오류
+- USGS API와 OpenAQ API가 정상 작동하는지 확인
+- Rate limit에 걸렸는지 확인 (너무 많은 요청 시)
+- 네트워크 연결 상태 확인
 
 ### CORS 오류
 - `server/src/index.js`에서 CORS 설정 확인

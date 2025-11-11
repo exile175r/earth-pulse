@@ -11,16 +11,6 @@
       "src": "/api/(.*)",
       "dest": "api/index.js"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/usgs",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/openaq",
-      "schedule": "*/15 * * * *"
-    }
   ]
 }
 
