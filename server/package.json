@@ -1,26 +1,21 @@
 {
   "name": "earthpulse-server",
   "version": "1.0.0",
-  "description": "EarthPulse - 3D 지구 실시간 환경 대시보드 서버",
+  "description": "EarthPulse - 3D 지구 실시간 환경 대시보드 서버 (API Proxy)",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "migrate": "node src/db/migrate.js"
+    "dev": "node --watch src/index.js"
   },
-  "keywords": ["earthquake", "air-quality", "dashboard", "3d"],
+  "keywords": ["earthquake", "air-quality", "dashboard", "3d", "api-proxy"],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "mysql2": "^3.6.5",
-    "node-cron": "^3.0.3",
-    "winston": "^3.11.0",
     "dotenv": "^16.3.1",
     "express-rate-limit": "^7.1.5",
-    "cors": "^2.8.5",
-    "ioredis": "^5.3.2"
+    "cors": "^2.8.5"
   },
   "devDependencies": {}
 }
