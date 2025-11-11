@@ -132,15 +132,14 @@ export default function WorldWindScene() {
   useEffect(() => {
     if (!wwdRef.current) return;
     
-    const layers = wwdRef.current.layers;
-    for (let i = 0; i < layers.length; i++) {
-      const layer = layers[i];
-      if (layer instanceof WorldWindEarthquakeLayer) {
-        layer.setTimeRange(timeRange);
-      } else if (layer instanceof WorldWindAirQualityLayer) {
-        layer.setTimeRange(timeRange);
-        layer.setParameter(parameter);
-      }
+    // 레이어 참조를 저장하여 나중에 사용
+    const wwd = wwdRef.current;
+    if (wwd.earthquakeLayer) {
+      wwd.earthquakeLayer.setTimeRange(timeRange);
+    }
+    if (wwd.airQualityLayer) {
+      wwd.airQualityLayer.setTimeRange(timeRange);
+      wwd.airQualityLayer.setParameter(parameter);
     }
   }, [timeRange, parameter]);
 
