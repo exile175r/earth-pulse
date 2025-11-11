@@ -25,20 +25,6 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 
-// 루트 경로
-app.get('/', (req, res) => {
-  res.json({
-    message: 'EarthPulse API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/api/health',
-      earthquakes: '/api/eq/recent',
-      airQuality: '/api/aq/recent',
-      tiles: '/api/tiles/aq-heat/:z/:x/:y',
-    },
-  });
-});
-
 // 라우트
 app.use('/api/health', healthRouter);
 app.use('/api/eq', eqRouter);
